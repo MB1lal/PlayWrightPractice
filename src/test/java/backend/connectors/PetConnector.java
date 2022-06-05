@@ -13,6 +13,8 @@ import utils.SharedState;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.Assert.assertEquals;
 
 public class PetConnector {
@@ -41,9 +43,10 @@ public class PetConnector {
     }
 
     public APIResponse getPetStatus(List<String> status) {
+        RequestOptions options = RequestOptions.create();
+       status.forEach( items -> options.setQueryParam("status", items));
         return baseRequest()
-                .get("findByStatus",
-                        RequestOptions.create().setQueryParam("status",status.stream().toString()));
+                .get("findByStatus", options);
     }
 
     public void deletePetWithId(int petId) {
@@ -53,8 +56,10 @@ public class PetConnector {
 
     public void updatePetDetails(String attribute, String attributeValue) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "x-www-form-urlencoded");
-        APIRequestContext request = playwright.request().newContext(new APIRequest.NewContextOptions().setExtraHTTPHeaders(headers));
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+        APIRequestContext request = playwright.request().newContext(new APIRequest.NewContextOptions()
+                        .setBaseURL(EnvSerenity.basePetURI)
+                .setExtraHTTPHeaders(headers));
         FormData formData = FormData.create();
         formData.set(attribute,attributeValue);
 

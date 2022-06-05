@@ -1,17 +1,19 @@
 package backend.steps;
 
 import backend.models.store.PetStoreModel;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.APIResponse;
+import com.microsoft.playwright.Response;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import utils.SharedState;
 
-import static org.junit.Assert.assertEquals;
-import static utils.SharedStateConstants.BACKEND.PET_STORE.PET_ORDER_ID;
-import static utils.SharedStateConstants.BACKEND.PET_STORE.PET_STORE_RESPONSE;
+import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 public class PetStoreSteps extends BaseSteps {
 
 
@@ -19,6 +21,7 @@ public class PetStoreSteps extends BaseSteps {
     public void placingOrderOnPetStore(int orderId) {
         PetStoreModel petStoreModel = createPetStorePayload();
         petStoreModel.setId(orderId);
+        SharedState.PET_STORE_ID = orderId;
         placePetStoreOrder(petStoreModel);
     }
 
@@ -28,9 +31,11 @@ public class PetStoreSteps extends BaseSteps {
     }
 
     @Then("The order is successfully placed")
-    public void assertingOrderIsSuccessfullyPlaced() {
+    public void assertingOrderIsSuccessfullyPlaced() throws IOException {
         APIResponse response = SharedState.PET_STORE_RESPONSE;
-        PetStoreModel petStoreModel =   response.text().transform(s -> new PetStoreModel());
+        ObjectMapper mapper = new ObjectMapper();
+
+        PetStoreModel petStoreModel = mapper.readValue(response.text(),PetStoreModel.class);
 
         assertEquals(petStoreModel.getId(), SharedState.PET_STORE_ID);
     }

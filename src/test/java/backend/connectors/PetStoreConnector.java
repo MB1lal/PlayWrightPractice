@@ -33,7 +33,6 @@ public class PetStoreConnector {
     public void placingAnOrder(String body) {
         APIResponse addNewPet = baseRequest().post("order",
                 RequestOptions.create().setData(body));
-        System.out.println(body);
         assertTrue(addNewPet.ok());
         assertEquals(200, addNewPet.status() );
     }
