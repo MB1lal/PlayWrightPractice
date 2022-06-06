@@ -3,6 +3,7 @@
   Feature: Test user operations
 
 
+    @ignore
     Scenario: User can successfully login and logout
       Given I create a user
       When User is successfully created
