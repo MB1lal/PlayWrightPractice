@@ -7,8 +7,7 @@ import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.FormData;
 import com.microsoft.playwright.options.RequestOptions;
-import core.EnvSerenity;
-import utils.SharedState;
+import core.Environment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +23,7 @@ public class UserConnector {
         headers.put("Content-Type", "application/json");
         return playwright.request()
                 .newContext(new APIRequest.NewContextOptions()
-                        .setBaseURL(EnvSerenity.userURI)
+                        .setBaseURL(Environment.userURI)
                         .setExtraHTTPHeaders(headers)
                 );
     }

@@ -3,6 +3,8 @@ package utils;
 
 import com.microsoft.playwright.APIResponse;
 
+import java.util.List;
+
 public class SharedState {
     public static APIResponse PET_RESPONSE;
     public static long PET_ID;
@@ -23,4 +25,6 @@ public class SharedState {
     }
 
     public static APIResponse USER_RESPONSE;
+
+    public static List<List<String>> EXCEL_DATA;
 }

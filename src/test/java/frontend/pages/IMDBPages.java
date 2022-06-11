@@ -1,56 +1,48 @@
 package frontend.pages;
 
-import net.serenitybdd.core.pages.WebElementFacade;
-import net.thucydides.core.pages.PageObject;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
-
-import java.time.Duration;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class IMDBPages extends PageObject {
+public class IMDBPages {
 
-    WebDriver driver = super.getDriver();
-
-    @FindBy(id = "home_img")
-    WebElementFacade pageLogo;
-
-    @FindBy(css = "input[class='ipc-metadata-list-item__label ipc-metadata-list-item__label--link']")
-    WebElementFacade allCastAndCrew;
-
-    @FindBy(xpath = "//*[@id='fullcredits_content']/table[3]/tbody/tr")
-    WebElement castTable;
-
-    By castTableRow = By.xpath("//*[@id='fullcredits_content']/table[3]/tbody/tr");
+    private final Page page;
+    private final Locator pageLogo;
+    private final Locator allCastAndCrew;
+    private final Locator castTable;
+    private final Locator castTableRow;
+   public IMDBPages(Page page) {
+       this.page = page;
+       this.pageLogo = page.locator("home_img");
+       this.allCastAndCrew = page.locator("input[class='ipc-metadata-list-item__label ipc-metadata-list-item__label--link']");
+       this.castTable = page.locator("//*[@id='fullcredits_content']/table[3]/tbody/tr");
+       this.castTableRow = page.locator("//*[@id='fullcredits_content']/table[3]/tbody/tr");
+   }
 
     public void pageHasLogo() {
-        pageLogo.withTimeoutOf(Duration.ofSeconds(3));
-        pageLogo.isDisplayed();
+       pageLogo.isVisible();
     }
 
     public void scrollToText(String elementText) {
-        WebElement targetElement = find(By.linkText(elementText));
-        ((JavascriptExecutor) super.getDriver()).executeScript("arguments[0].scrollIntoView(true);", targetElement);
+       Locator targetElement = page.locator("text=" + elementText);
+       targetElement.scrollIntoViewIfNeeded();
     }
 
     public void clickScrolledElement(String elementText) {
-        WebElement targetElement = find(By.linkText(elementText));
+        Locator targetElement = page.locator("text=" + elementText);
         targetElement.click();
     }
 
     public List<List<String>> getCastTableData() {
         List<List<String>> castTableData = new ArrayList<>();
-        List<WebElement> tableData = driver.findElements(castTableRow);
+        List<String> tableData = castTableRow.allInnerTexts();
         List<String> rows = new ArrayList<>();
 
-        for (WebElement tableDatum : tableData) {
-            if (!tableDatum.getAttribute("outerText").equalsIgnoreCase("")) {
-                rows.add(tableDatum.getAttribute("outerText"));
+        for (String tableDatum : tableData) {
+            if (!tableDatum.equalsIgnoreCase("")) {
+                rows.add(tableDatum);
             }
         }
        for (int i=0; i<rows.size(); i++) {

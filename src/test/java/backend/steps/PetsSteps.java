@@ -1,15 +1,11 @@
 package backend.steps;
 
 import backend.models.pet.PetModel;
-import backend.models.store.PetStoreModel;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.APIResponse;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import net.serenitybdd.core.Serenity;
 import utils.SharedState;
 
 import java.io.IOException;
@@ -17,8 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static utils.SharedStateConstants.BACKEND.PET.PET_RESPONSE;
-import static utils.SharedStateConstants.BACKEND.PET_ID;
 
 public class PetsSteps extends BaseSteps {
 
@@ -41,16 +35,15 @@ public class PetsSteps extends BaseSteps {
     }
 
     @And("The pet with id = {int} {}")
-    public void assertingPetWithId(int petId, String result) throws JsonProcessingException {
+    public void assertingPetWithId(int petId, String result) throws IOException {
         APIResponse response = SharedState.PET_RESPONSE;
-        ObjectMapper mapper = new ObjectMapper();
         logger.info("Asserting the petId response.");
         switch (result) {
             case "exists" -> {
                 assertThat(response.status())
                         .withFailMessage("The pet with id = " + petId + " doesn't exists")
                         .isEqualTo(200);
-                PetModel petResponse = mapper.readValue(response.text(),PetModel.class);
+                PetModel petResponse = objectMapper.readValue(response.text(),PetModel.class);
                 assertThat(petResponse.getId())
                         .withFailMessage("No pet with petId = " + petId + " exists.")
                         .isEqualTo(petId);
@@ -72,9 +65,8 @@ public class PetsSteps extends BaseSteps {
     }
 
     @Then("The pet has status = {}")
-    public void assertingPetWithStatus(String status) throws JsonProcessingException {
+    public void assertingPetWithStatus(String status) throws IOException {
         APIResponse response = SharedState.PET_RESPONSE;
-        ObjectMapper objectMapper = new ObjectMapper();
         PetModel petModel;
         if (response.text().startsWith("{")) {
             petModel = objectMapper.readValue(response.text(),PetModel.class);

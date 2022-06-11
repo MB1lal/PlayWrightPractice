@@ -6,7 +6,8 @@ import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.RequestOptions;
-import core.EnvSerenity;
+import core.Environment;
+import core.PropertiesReader;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +25,7 @@ public class PetStoreConnector {
         headers.put("Content-Type", "application/json");
         request = playwright.request()
                 .newContext(new APIRequest.NewContextOptions()
-                        .setBaseURL(EnvSerenity.basePetStoreURI)
+                        .setBaseURL(Environment.basePetStoreURI)
                         .setExtraHTTPHeaders(headers)
                 );
         return request;
