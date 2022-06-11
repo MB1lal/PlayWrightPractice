@@ -7,13 +7,12 @@ import com.microsoft.playwright.APIResponse;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.FormData;
 import com.microsoft.playwright.options.RequestOptions;
-import core.EnvSerenity;
+import core.Environment;
 import utils.SharedState;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,7 +25,7 @@ public class PetConnector {
         headers.put("Content-Type", "application/json");
         return playwright.request()
                 .newContext(new APIRequest.NewContextOptions()
-                        .setBaseURL(EnvSerenity.basePetURI)
+                        .setBaseURL(Environment.basePetURI)
                         .setExtraHTTPHeaders(headers)
                 );
     }
@@ -58,7 +57,7 @@ public class PetConnector {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/x-www-form-urlencoded");
         APIRequestContext request = playwright.request().newContext(new APIRequest.NewContextOptions()
-                        .setBaseURL(EnvSerenity.basePetURI)
+                        .setBaseURL(Environment.basePetURI)
                 .setExtraHTTPHeaders(headers));
         FormData formData = FormData.create();
         formData.set(attribute,attributeValue);

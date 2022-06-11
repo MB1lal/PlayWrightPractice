@@ -3,7 +3,6 @@ package frontend.steps;
 import frontend.pages.IMDBPages;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
-import net.serenitybdd.core.Serenity;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import utils.ExcelWriter;
 
@@ -12,11 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static utils.SharedStateConstants.FRONTEND.CAST_AND_CREW;
-import static utils.SharedStateConstants.FRONTEND.EXCEL_DATA;
 
 public class IMDBSteps extends BaseSteps{
 
-    IMDBPages imdbPages;
+    IMDBPages imdbPages = new IMDBPages(page);
 
     @And("User scrolls down to find the {string} text")
     public void scrollsDownToElement(String elementText) {
@@ -35,14 +33,14 @@ public class IMDBSteps extends BaseSteps{
         castDetails.add(new ArrayList<>());
         castDetails.get(0).addAll(information);
         castDetails.addAll(imdbPages.getCastTableData());
-        Serenity.setSessionVariable(CAST_AND_CREW).to(castDetails);
+//        Serenity.setSessionVariable(CAST_AND_CREW).to(castDetails);
     }
 
     @And("User exports all the data into {string} sheet")
     public void exportDataToExcel(String sheetName) throws IOException, InvalidFormatException {
         ExcelWriter excelWriter = ExcelWriter.getInstance();
-        excelWriter.writeToExcel(Serenity.sessionVariableCalled(CAST_AND_CREW),
-                "testData",
-                sheetName);
+//        excelWriter.writeToExcel(Serenity.sessionVariableCalled(CAST_AND_CREW),
+//                "testData",
+//                sheetName);
     }
 }

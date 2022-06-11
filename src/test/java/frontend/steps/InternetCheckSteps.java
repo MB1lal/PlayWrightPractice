@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class InternetCheckSteps extends BaseSteps{
 
     @Given("User has internet connectivity")
     public void checkInternetConnectivity() throws IOException {
-        logger.info("Checking internet connectivity");
+//        logger.info("Checking internet connectivity");
         URL url = new URL("https://www.google.com/");
         URLConnection connection = url.openConnection();
         boolean isConnected;

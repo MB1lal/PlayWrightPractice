@@ -1,10 +1,7 @@
 package backend.steps;
 
 import backend.models.store.PetStoreModel;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.playwright.APIResponse;
-import com.microsoft.playwright.Response;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -33,9 +30,8 @@ public class PetStoreSteps extends BaseSteps {
     @Then("The order is successfully placed")
     public void assertingOrderIsSuccessfullyPlaced() throws IOException {
         APIResponse response = SharedState.PET_STORE_RESPONSE;
-        ObjectMapper mapper = new ObjectMapper();
 
-        PetStoreModel petStoreModel = mapper.readValue(response.text(),PetStoreModel.class);
+        PetStoreModel petStoreModel = objectMapper.readValue(response.text(),PetStoreModel.class);
 
         assertEquals(petStoreModel.getId(), SharedState.PET_STORE_ID);
     }

@@ -6,12 +6,12 @@ import backend.connectors.UserConnector;
 import backend.models.pet.PetModel;
 import backend.models.store.PetStoreModel;
 import backend.models.users.UserModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.microsoft.playwright.Playwright;
-import core.EnvSerenity;
+import core.Environment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import utils.SharedState;
@@ -46,7 +46,7 @@ public abstract class BaseSteps {
     public PetModel createPetPayloadUsingFile() throws IOException {
         logger.info("Creating a pet payload using sample json file");
         return getStaticBody(
-            PetModel.class, EnvSerenity.petFileBodiesRoot + "new-pet.json");
+            PetModel.class, Environment.petFileBodiesRoot + "new-pet.json");
     }
 
     public PetStoreModel createPetStorePayload() {
