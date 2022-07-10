@@ -5,12 +5,11 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import utils.ExcelWriter;
+import utils.SharedState;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static utils.SharedStateConstants.FRONTEND.CAST_AND_CREW;
 
 public class IMDBSteps extends BaseSteps{
 
@@ -33,14 +32,14 @@ public class IMDBSteps extends BaseSteps{
         castDetails.add(new ArrayList<>());
         castDetails.get(0).addAll(information);
         castDetails.addAll(imdbPages.getCastTableData());
-//        Serenity.setSessionVariable(CAST_AND_CREW).to(castDetails);
+        SharedState.CAST_AND_CREW = castDetails;
     }
 
     @And("User exports all the data into {string} sheet")
     public void exportDataToExcel(String sheetName) throws IOException, InvalidFormatException {
         ExcelWriter excelWriter = ExcelWriter.getInstance();
-//        excelWriter.writeToExcel(Serenity.sessionVariableCalled(CAST_AND_CREW),
-//                "testData",
-//                sheetName);
+        excelWriter.writeToExcel(SharedState.CAST_AND_CREW,
+                "testData",
+                sheetName);
     }
 }

@@ -25,6 +25,6 @@ public class SharedState {
     }
 
     public static APIResponse USER_RESPONSE;
-
+    public static List<List<String>>  CAST_AND_CREW;
     public static List<List<String>> EXCEL_DATA;
 }
