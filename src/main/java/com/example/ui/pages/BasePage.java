@@ -4,6 +4,8 @@ import com.example.base.TestContext;
 import com.example.utils.AssertionHelper;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.FrameLocator;
+import com.microsoft.playwright.options.MouseButton;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -190,16 +192,16 @@ public abstract class BasePage {
     }
     
     /**
-     * Switch to frame
+     * Locate a frame for chained element access.
+     * Example: {@code frame("#my-frame").locator("button").click();}
      */
-    protected void switchToFrame(String frameSelector) {
+    protected FrameLocator frame(String frameSelector) {
         try {
-            log.debug("Switching to frame: {}", frameSelector);
-            page.frameLocator(frameSelector).contentFrame();
-            log.debug("Frame switched successfully");
+            log.debug("Locating frame: {}", frameSelector);
+            return page.frameLocator(frameSelector);
         } catch (Exception e) {
-            log.error("Failed to switch to frame: {}", frameSelector, e);
-            throw new RuntimeException("Frame switch failed: " + frameSelector, e);
+            log.error("Failed to locate frame: {}", frameSelector, e);
+            throw new RuntimeException("Frame lookup failed: " + frameSelector, e);
         }
     }
     
@@ -253,7 +255,7 @@ public abstract class BasePage {
         try {
             log.debug("Right-clicking on element: {}", elementName);
             locator.waitFor();
-            locator.click(new Locator.ClickOptions().setButton("right"));
+            locator.click(new Locator.ClickOptions().setButton(MouseButton.RIGHT));
             log.debug("Element right-clicked successfully: {}", elementName);
         } catch (Exception e) {
             log.error("Failed to right-click on element: {}", elementName, e);

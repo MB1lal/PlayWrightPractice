@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -11,33 +11,46 @@
     <packaging>jar</packaging>
 
     <name>Playwright Practice</name>
-    <description>Playwright UI Testing Framework</description>
+    <description>Playwright UI testing framework (Java 21, Cucumber 7, JUnit 5)</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <java.version>21</java.version>
+        <maven.compiler.release>21</maven.compiler.release>
 
-        <!-- Playwright -->
-        <playwright.version>1.40.0</playwright.version>
+        <!-- UI automation -->
+        <playwright.version>1.62.0</playwright.version>
 
-        <!-- Testing Frameworks -->
-        <junit.version>5.10.0</junit.version>
-        <testng.version>7.8.1</testng.version>
+        <!-- BDD / test execution (versions managed via BOMs below) -->
+        <junit-bom.version>5.14.2</junit-bom.version>
 
-        <!-- Assertions & Logging -->
-        <assertj.version>3.24.1</assertj.version>
-        <slf4j.version>2.0.9</slf4j.version>
-        <logback.version>1.4.11</logback.version>
+        <!-- Assertions & logging -->
+        <assertj.version>3.27.7</assertj.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.18</logback.version>
 
         <!-- Utilities -->
-        <lombok.version>1.18.30</lombok.version>
-        <gson.version>2.10.1</gson.version>
+        <lombok.version>1.18.48</lombok.version>
+        <datafaker.version>2.7.0</datafaker.version>
+        <poi.version>5.5.1</poi.version>
 
         <!-- Plugins -->
-        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Single source of truth for JUnit 5 module versions -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Playwright -->
@@ -47,47 +60,18 @@
             <version>${playwright.version}</version>
         </dependency>
 
-        <!-- JUnit 5 -->
+        <!-- Apache POI (Excel test-data support in framework utils) -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
         </dependency>
 
-        <!-- TestNG (Alternative) -->
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>${testng.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- AssertJ for Fluent Assertions -->
+        <!-- AssertJ (used by framework assertion helpers) -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
-        </dependency>
-
-        <!-- Lombok for Annotations -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- SLF4J API -->
@@ -97,42 +81,68 @@
             <version>${slf4j.version}</version>
         </dependency>
 
-        <!-- Logback Implementation -->
+        <!-- Logback (runtime logging implementation) -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
 
-        <!-- GSON for JSON Parsing -->
+        <!-- Route Log4j-API logs (e.g. from Apache POI) into SLF4J/Logback -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${gson.version}</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-to-slf4j</artifactId>
+            <version>2.24.3</version>
         </dependency>
 
-        <!-- JavaFaker for Test Data -->
+        <!-- Lombok -->
         <dependency>
-            <groupId>com.github.javafaker</groupId>
-            <artifactId>javafaker</artifactId>
-            <version>1.0.2</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JUnit 5 (versions from junit-bom) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Datafaker (modern JavaFaker replacement for test-data generation) -->
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>${datafaker.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <release>${maven.compiler.release}</release>
+                    <!-- Lombok needs explicit annotation-processor path on JDK 21+ -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
-            <!-- Surefire Plugin for Unit Tests -->
+            <!--
+              UI tests run on the JUnit Platform (Surefire auto-detects the
+              Jupiter engine). Method/class parallelism is configured in
+              src/test/resources/junit-platform.properties.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -140,33 +150,8 @@
                 <configuration>
                     <includes>
                         <include>**/*Test.java</include>
-                        <include>**/*Tests.java</include>
                     </includes>
-                    <parallel>methods</parallel>
-                    <threadCount>8</threadCount>
                 </configuration>
-            </plugin>
-
-            <!-- Failsafe Plugin for Integration Tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${maven-failsafe-plugin.version}</version>
-                <configuration>
-                    <includes>
-                        <include>**/*IT.java</include>
-                    </includes>
-                    <parallel>methods</parallel>
-                    <threadCount>8</threadCount>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
