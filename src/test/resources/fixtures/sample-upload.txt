@@ -1,0 +1,2 @@
+Hello from the Playwright upload test.
+This file is attached by FileUploadTest via setInputFiles.
