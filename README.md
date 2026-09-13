@@ -1,111 +1,78 @@
 # Playwright Java Framework
 
-A Playwright UI test-automation framework in **Java 21** — Page Objects, **JUnit 5**,
-parallel execution, and Excel-driven test data. No Cucumber, no API layer: just the
-modern, industry-standard Playwright stack.
+My Playwright + Java test automation setup. Page objects, JUnit 5, parallel
+test classes, Excel-driven test data. I deliberately left out Cucumber and any
+API layer — for a UI framework, plain Playwright with a good base test class
+turns out to be all you need.
 
-It covers two demo targets:
+Most of the suite runs against
+[the-internet.herokuapp.com](https://the-internet.herokuapp.com) — I ported
+those over from an old Cypress project of mine, spec by spec. There's also a
+DuckDuckGo search demo and an IMDb scrape-to-Excel demo in there.
 
-| Target | Tests | Origin |
-|---|---|---|
-| `https://the-internet.herokuapp.com` | 17 test classes, 27 tests | Ported from the Cypress specs in `CypressAutomation/cypress/e2e` |
-| DuckDuckGo search + IMDb scrape/export | 2 test classes, 4 tests | Original Excel-driven demos (see “Disabled tests” below) |
+(This used to be a Cucumber + REST-assured hybrid. I stripped all of that out;
+the git history still has it if you're curious.)
 
-## Prerequisites
+## Getting started
 
-- **Java 21+** (`java -version`)
-- **Maven 3.9+** (`mvn -version`)
-- Browsers are downloaded on first use — no manual install needed:
-  ```bash
-  mvn compile
-  java -cp "target/classes:$(mvn -q dependency:build-classpath -Dmdep.outputFile=/dev/stdout)" \
-      com.microsoft.playwright.CLI install chromium
-  ```
-
-## Running tests
+You need Java 21 and Maven. Browsers don't come bundled, so install Chromium
+once up front:
 
 ```bash
-# Full suite (headless Chromium, 4 parallel classes)
-mvn test
-
-# One test class
-mvn test -Dtest=LoginTest
-
-# Headed mode / different browser
-mvn test -Dheadless=false
-mvn test -Dbrowser=firefox -Dheadless=false   # chromium | chrome | firefox | webkit
-
-# Slow-motion debugging
-mvn test -Dheadless=false -Dslow.mo.ms=500
-
-# Skip the slow IMDb demo / run only fast tests
-mvn test -Dtest='!ImdbCastTest'
+mvn compile
+java -cp "target/classes:$(mvn -q dependency:build-classpath -Dmdep.outputFile=/dev/stdout)" \
+    com.microsoft.playwright.CLI install chromium
 ```
 
-Configuration keys live in `src/test/resources/config.properties` (defaults in
-`src/main/resources/application.properties`). Every key can be overridden with
-`-Dkey=value`; `browser`, `headless`, `base.url` and `heroku.url` additionally
-honor the `BROWSER`, `HEADLESS`, `BASE_URL`, `HEROKU_URL` environment variables.
+Then:
 
-| Key | Default | Meaning |
-|---|---|---|
-| `base.url` | `https://duckduckgo.com` | Search-demo entry point |
-| `heroku.url` | `https://the-internet.herokuapp.com` | Cypress-port target |
-| `browser` | `chromium` | `chromium` (OSS build) \| `chrome` (branded) \| `firefox` \| `webkit` |
-| `headless` | `true` | Headless browser |
-| `slow.mo.ms` | `0` | Delay between actions (debugging) |
-| `timeout.ms` | `30000` | Navigation/action/assertion timeout |
-| `viewport.width/height` | `1920x1080` | Browser viewport |
-| `testdata.dir` | `src/test/resources/data-files` | Excel test data |
-| `screenshot.dir` | `target/screenshots` | Failure screenshots |
+```bash
+mvn test                              # the whole suite, headless, parallel
+mvn test -Dtest=LoginTest             # one class while you're working on it
+mvn test -Dheadless=false             # watch it run
+mvn test -Dbrowser=firefox            # chromium | chrome | firefox | webkit
+mvn test -Dheadless=false -Dslow.mo.ms=500   # slow-motion debugging
+```
 
-## Project structure
+Config lives in `src/test/resources/config.properties` (defaults in
+`src/main/resources/application.properties`). Anything in there can be
+overridden with `-Dkey=value`, and `browser`, `headless`, `base.url`,
+`heroku.url` also respect `BROWSER`, `HEADLESS`, `BASE_URL`, `HEROKU_URL`
+environment variables — handy for CI. The knobs you'll actually touch:
+`browser`, `headless`, `timeout.ms`, and `screenshot.dir`.
+
+## How it's laid out
 
 ```
 src/main/java/io/github/mb1lal/playwright/
-├── base/TestContext.java          # Per-test shared state (replaces static SharedState)
-├── config/ConfigManager.java      # system props > env > config.properties > application.properties
-├── playwright/BrowserManager.java # ThreadLocal Playwright lifecycle (parallel-safe)
-├── ui/pages/
-│   ├── BasePage.java              # Click/fill/assert building blocks for all pages
-│   ├── DuckDuckGoPage.java        # Search demos
-│   ├── ImdbPage.java              # IMDb title + full-credits scraping
-│   └── heroku/                    # One page object per Herokuapp feature (17 pages)
-└── utils/
-    ├── AssertionHelper.java       # AssertJ helpers with logging
-    ├── ExcelReader.java           # testData.xlsx -> List<List<String>> (+ A1-style cell refs)
-    └── ExcelWriter.java           # Tables -> workbooks under target/ (never mutates test data)
+├── base/TestContext.java          # per-test shared state (no statics, so parallel is safe)
+├── config/ConfigManager.java      # system props > env > config file > built-in defaults
+├── playwright/BrowserManager.java # owns the browser lifecycle, all ThreadLocal
+├── ui/pages/                      # BasePage + DuckDuckGoPage + ImdbPage + heroku/ (16 pages)
+└── utils/                         # AssertJ helpers, ExcelReader, ExcelWriter
 
 src/test/java/io/github/mb1lal/playwright/
-├── support/BaseUiTest.java        # @BeforeEach browser start, failure screenshot, @AfterEach cleanup
-└── tests/
-    ├── SearchTest.java            # Parameterized, Excel-driven search smoke tests
-    ├── ImdbCastTest.java          # Search -> IMDb -> scrape cast -> export + verify round-trip
-    ├── ExcelUtilsTest.java        # Hermetic unit tests (Datafaker-generated round-trips)
-    └── heroku/                    # 17 classes mirroring the Cypress specs 1:1
+├── support/BaseUiTest.java        # starts the browser, screenshots on failure, cleans up
+└── tests/                         # SearchTest, ImdbCastTest, ExcelUtilsTest + heroku/ (17 classes)
 
 src/test/resources/
-├── config.properties              # Test-run configuration
-├── junit-platform.properties      # Parallelism: test classes run concurrently (4 threads)
-├── data-files/testData.xlsx       # Search terms (input) + sample cast table
-└── fixtures/sample-upload.txt     # Attached by FileUploadTest
+├── config.properties              # your test-run settings go here
+├── junit-platform.properties      # test classes run concurrently (4 threads)
+├── data-files/testData.xlsx       # search terms + sample cast table
+└── fixtures/sample-upload.txt     # attached by FileUploadTest
 ```
 
-Test reports and artifacts:
+After a run: JUnit reports in `target/surefire-reports/`, failure screenshots
+(`<Test>-<method>-<timestamp>.png`) in `target/screenshots/`, IMDb exports and
+downloads under `target/test-output/` and `target/downloads/`. Exports always
+go to `target/` — committed test data never gets mutated.
 
-```
-target/surefire-reports/   # JUnit reports
-target/screenshots/        # Failure screenshots (<Test>-<method>-<timestamp>.png)
-target/test-output/        # IMDb cast exports (timestamped, parallel-safe)
-target/downloads/          # Downloaded files
-```
+## Adding a test
 
-## Writing a new test
-
-1. Add a page object under `src/main/java/io/github/mb1lal/playwright/ui/pages/` extending `BasePage`
-   (inherit `click`, `fill`, `assertIsVisible`, … — don't wrap Playwright twice).
-2. Add a test class under `src/test/java/io/github/mb1lal/playwright/tests/` extending `BaseUiTest`
-   — you get a fresh `browser` (started) and `context` for free:
+New page object under `ui/pages/` extending `BasePage` (you inherit `click`,
+`fill`, `assertIsVisible`, … — don't wrap Playwright twice), then a test class
+extending `BaseUiTest`, which hands you a started `browser` and a fresh
+`context`:
 
 ```java
 @Tag("ui")
@@ -123,43 +90,36 @@ class LoginTest extends BaseUiTest {
 }
 ```
 
-Conventions worth keeping:
+Two rules I try to stick to: locators live in page objects, assertions about
+outcomes live in tests. And if you need fake data, Datafaker is already a test
+dependency — see `ExcelUtilsTest` for the pattern.
 
-- **Locators live in page objects, assertions about business outcomes in tests.**
-- `getByRole(…).setExact(true)` for navigation links — role-name lookup is
-  substring-based (`Frames` also matches `Nested Frames`).
-- Never `waitFor visible` on inherently hidden nodes (`<option>`); read state via
-  `evaluate`/`inputValue` instead (see `DropdownPage`).
-- Never write into `src/test/resources` at runtime — exports go to `target/`.
-- Need fake data? `net.datafaker:datafaker` is already a test dependency
-  (see `ExcelUtilsTest`).
+## Things I learned the hard way
 
-## Cypress parity notes
+All baked into the code, written down so future-me doesn't rediscover them:
 
-The `heroku/` tests mirror `CypressAutomation/cypress/e2e/*.cy.js` behavior-for-behavior,
-with Playwright-native upgrades where Cypress needed workarounds:
+- `getByRole` matches names by **substring**. `goTo("Frames")` happily matches
+  "Nested Frames" too and blows up on strict mode — hence `setExact(true)` in
+  the nav helper.
+- `<option>` elements are never "visible" as far as Playwright is concerned,
+  so the selected dropdown value is read via JS, not the usual helpers.
+- The Herokuapp TinyMCE demo key is out of editor loads, so that editor is
+  permanently read-only with no content. The iframe test just checks the frame
+  is there.
+- The ported Cypress specs needed a few corrections: the live JS prompt says
+  `I am a JS prompt` (lowercase p), and the A/B page now deterministically
+  renders `No A/B Test` with the opt-out cookie. The file-download spec was
+  `it.skip`ped in Cypress for needing a plugin — here it just uses the
+  download event, so it runs.
+- `SearchTest` and `ImdbCastTest` are `@Disabled`. Google throws reCAPTCHAs,
+  DuckDuckGo throws a "prove you're human" challenge, and IMDb plain 403s —
+  all three fingerprint datacenter IPs. They pass fine from a home connection;
+  re-enable there with `-Dtest=SearchTest,ImdbCastTest`.
 
-- **Multiple windows** — uses `waitForPopup()` instead of stripping `target`.
-- **File download** — uses the download event (the Cypress spec is `it.skip`ped and
-  needs an extra plugin; here it runs).
-- **File upload** — `setInputFiles`, no `cypress-file-upload` plugin.
-- **Basic auth (invalid creds)** — asserted at UI level (401 page) instead of `cy.request`.
-- **A/B test** — expectations updated: with the opt-out cookie the live site now
-  deterministically renders `No A/B Test` (verified against the server).
-- **JS prompt** — the live page says `I am a JS prompt` (lowercase p), unlike the
-  stale Cypress expectation.
-- **Iframe editor** — asserts iframe presence only: the demo's TinyMCE cloud key is
-  out of editor loads, so the editor renders read-only with no content.
+## CI
 
-## Disabled tests
-
-`SearchTest` (3 tests) and `ImdbCastTest` (1 test) are `@Disabled`: Google answers
-automation with reCAPTCHA, DuckDuckGo with a human-challenge, and IMDb with HTTP 403
-— all three fingerprint datacenter IPs. They pass on residential networks or headed
-local runs; re-enable there with `-Dtest=SearchTest,ImdbCastTest`. Failure screenshots
-in `target/screenshots/` document each block.
-
-## CI example (GitHub Actions)
+Nothing exotic — install browsers with OS deps, run Maven, keep the screenshots
+when it fails:
 
 ```yaml
 - uses: actions/setup-java@v4
@@ -172,19 +132,9 @@ in `target/screenshots/` document each block.
     path: target/screenshots/
 ```
 
-## Tech stack
+## What's inside
 
-| Library | Version | Managed by |
-|---|---|---|
-| Playwright | 1.62.0 | `playwright.version` |
-| JUnit 5 (BOM) | 5.14.2 | `junit-bom.version` |
-| AssertJ | 3.27.7 | `assertj.version` |
-| Logback / SLF4J | 1.5.18 / 2.0.17 | `logback.version` / `slf4j.version` |
-| Lombok | 1.18.48 | `lombok.version` |
-| Datafaker | 2.7.0 | `datafaker.version` |
-| Apache POI | 5.5.1 | `poi.version` |
-| Surefire / Compiler plugin | 3.5.4 / 3.14.0 | properties |
-
-Removed in this rebuild: Cucumber, TestNG, JUnit 4, RestAssured-era API
-connectors/models/stepdefs, `SharedState` statics, `PropertiesReader`/`Environment`
-(replaced by `ConfigManager`), and the `log4j2.xml` test config (unified on Logback).
+- Playwright 1.62, JUnit 5 (BOM-managed), AssertJ
+- Logback + SLF4J for logging, Lombok for the boilerplate
+- Datafaker for generated test data, Apache POI for the Excel bits
+- Maven Surefire running test classes concurrently
