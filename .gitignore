@@ -41,11 +41,3 @@ build/
 logs/
 screenshots/
 test-output/
-
-### Node / Playwright Test ###
-node_modules/
-dist/
-test-results/
-playwright-report/
-playwright/.auth/
-.env
