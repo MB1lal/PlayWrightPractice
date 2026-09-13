@@ -5,13 +5,13 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example</groupId>
-    <artifactId>playwright-practice</artifactId>
+    <groupId>io.github.mb1lal</groupId>
+    <artifactId>playwright-java-framework</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Playwright Practice</name>
-    <description>Playwright UI testing framework (Java 21, Cucumber 7, JUnit 5)</description>
+    <name>Playwright Java Framework</name>
+    <description>Playwright UI testing framework (Java 21, JUnit 5)</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

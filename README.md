@@ -1,4 +1,4 @@
-# Playwright Practice
+# Playwright Java Framework
 
 A Playwright UI test-automation framework in **Java 21** — Page Objects, **JUnit 5**,
 parallel execution, and Excel-driven test data. No Cucumber, no API layer: just the
@@ -62,7 +62,7 @@ honor the `BROWSER`, `HEADLESS`, `BASE_URL`, `HEROKU_URL` environment variables.
 ## Project structure
 
 ```
-src/main/java/com/example/
+src/main/java/io/github/mb1lal/playwright/
 ├── base/TestContext.java          # Per-test shared state (replaces static SharedState)
 ├── config/ConfigManager.java      # system props > env > config.properties > application.properties
 ├── playwright/BrowserManager.java # ThreadLocal Playwright lifecycle (parallel-safe)
@@ -76,7 +76,7 @@ src/main/java/com/example/
     ├── ExcelReader.java           # testData.xlsx -> List<List<String>> (+ A1-style cell refs)
     └── ExcelWriter.java           # Tables -> workbooks under target/ (never mutates test data)
 
-src/test/java/com/example/
+src/test/java/io/github/mb1lal/playwright/
 ├── support/BaseUiTest.java        # @BeforeEach browser start, failure screenshot, @AfterEach cleanup
 └── tests/
     ├── SearchTest.java            # Parameterized, Excel-driven search smoke tests
@@ -102,9 +102,9 @@ target/downloads/          # Downloaded files
 
 ## Writing a new test
 
-1. Add a page object under `src/main/java/com/example/ui/pages/` extending `BasePage`
+1. Add a page object under `src/main/java/io/github/mb1lal/playwright/ui/pages/` extending `BasePage`
    (inherit `click`, `fill`, `assertIsVisible`, … — don't wrap Playwright twice).
-2. Add a test class under `src/test/java/com/example/tests/` extending `BaseUiTest`
+2. Add a test class under `src/test/java/io/github/mb1lal/playwright/tests/` extending `BaseUiTest`
    — you get a fresh `browser` (started) and `context` for free:
 
 ```java

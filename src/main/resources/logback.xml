@@ -38,7 +38,7 @@
     </appender>
 
     <!-- Logger Configuration -->
-    <logger name="com.example" level="DEBUG"/>
+    <logger name="io.github.mb1lal.playwright" level="DEBUG"/>
     <logger name="com.microsoft.playwright" level="INFO"/>
 
     <!-- Root Logger -->
